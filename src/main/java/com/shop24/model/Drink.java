@@ -25,7 +25,7 @@ public class Drink {
     @Column(name = "price")
    
     private double price;
-    @Column(name = "quantinty")
+    @Column(name = "quantity")
   
     private int quantity;
     

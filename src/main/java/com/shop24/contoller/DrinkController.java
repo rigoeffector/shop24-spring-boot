@@ -53,6 +53,19 @@ public class DrinkController {
                     .body(ResponseBuilder.buildResponse(e.getMessage(), false, null));
         }
     }
+    
+//    @GetMapping("/most-consumed/{limit}")
+//    public ResponseEntity<Object> getMostConsumedDrinks(@PathVariable int limit) {
+//        try {
+//            List<Object[]> mostConsumedDrinks = drinkService.getMostConsumedDrinks(limit);
+//            // You might want to format the response as per your requirement
+//            return ResponseEntity.ok().body(ResponseBuilder.buildResponse(Shop24APIMessages.RETRIEVED_ALL_DRINKS, true, mostConsumedDrinks));
+//        } catch (IllegalArgumentException e) {
+//        	   return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                       .body(ResponseBuilder.buildResponse(e.getMessage(), false, null));
+//        }
+//    }
+
 
   
 }

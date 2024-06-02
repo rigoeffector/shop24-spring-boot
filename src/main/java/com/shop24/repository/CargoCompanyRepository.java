@@ -7,4 +7,6 @@ import com.shop24.model.CargoCompany;
 
 @Repository
 public interface CargoCompanyRepository extends JpaRepository<CargoCompany, Long> {
+	 boolean existsByName(String name);
+	
 }
