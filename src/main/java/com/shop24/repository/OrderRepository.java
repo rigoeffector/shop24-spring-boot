@@ -21,6 +21,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findTopPaidOrders(Pageable pageable);
     
     
-    @Query(value = "SELECT DISTINCT o FROM Order o ORDER BY o.client.id")
+    @Query(value = "SELECT o FROM Order o WHERE o.client.id IN (SELECT DISTINCT client.id FROM Order) ORDER BY o.id DESC")
     List<Order> findTopOrdersByDifferentClients(Pageable pageable);
+    
+    @Query("SELECT d.name, SUM(d.quantity) AS totalQuantity " +
+            "FROM Order o JOIN o.drinks d " +
+            "GROUP BY d.name " +
+            "ORDER BY totalQuantity DESC")
+     List<Object[]> findMostConsumedDrinks();
+     
+     
 }

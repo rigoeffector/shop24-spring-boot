@@ -11,16 +11,24 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.shop24.dto.CargoCompanyDTO;
 import com.shop24.model.CargoCompany;
+import com.shop24.model.Drink;
 import com.shop24.service.CargoCompanyService;
 import com.shop24.util.DTOMapper;
 import com.shop24.util.ResponseBuilder;
 import com.shop24.util.Shop24APIMessages;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDate;
+//import org.springframework.format.annotation.DateTimeFormat;
+
 @RestController
+@Tag(name = "get", description = "List Cargo Companies")
 @RequestMapping("/api/cargocompanies")
 public class CargoCompanyController {
 
@@ -40,6 +48,7 @@ public class CargoCompanyController {
         }
     }
 
+    @Tag(name = "get", description = "GET methods of Employee APIs")
     @GetMapping("/{id}")
     public ResponseEntity<Object> getCargoCompanyById(@PathVariable Long id) {
         CargoCompany cargoCompany = cargoCompanyService.getCargoCompanyById(id);
@@ -52,6 +61,7 @@ public class CargoCompanyController {
                     .body(ResponseBuilder.buildResponse(Shop24APIMessages.CARGO_COMPANY_NOT_FOUND, false, null));
         }
     }
+    @Tag(name = "get", description = "GET methods of Employee APIs")
 
     @GetMapping
     public ResponseEntity<Object> getAllCargoCompanies() {
@@ -60,6 +70,22 @@ public class CargoCompanyController {
         return ResponseEntity.ok()
                 .body(ResponseBuilder.buildResponse(Shop24APIMessages.RETRIVED_ALL_CARGO_COMPANY, true, cargoCompanyDTOList));
     }
+    
+    
+    
+//    @GetMapping("/{companyId}/drinks-transported-by-date-range")
+//    public ResponseEntity<Object> getDrinksTransportedByDateRangeAndCargoCompany(
+//            @PathVariable Long companyId,
+//            @RequestParam("startDate") @JsonFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+//            @RequestParam("endDate") @JsonFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+//        try {
+//            CargoCompany cargoCompany = cargoCompanyService.getCargoCompanyById(companyId);
+//            List<Drink> drinks = cargoCompanyService.getDrinksTransportedByDateRangeAndCargoCompany(startDate, endDate, cargoCompany);
+//            return ResponseEntity.ok().body(ResponseBuilder.buildResponse(Shop24APIMessages.RETRIEVED_DRINKS_TRANSPORTED, true, drinks));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseBuilder.buildResponse(e.getMessage(), false, null));
+//        }
+//    }
     
    
 }

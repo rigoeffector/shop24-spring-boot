@@ -1,6 +1,7 @@
 package com.shop24.contoller;
 
 import java.util.List;
+
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+
 import org.springframework.web.bind.annotation.RestController;
 
 import com.shop24.dto.OrderDTO;
@@ -106,15 +107,16 @@ public class OrderController {
     }
     
     
-    @GetMapping("/top-orders")
-    public ResponseEntity<Object> getTopOrdersByDifferentClients(@RequestParam int limit) {
+    @GetMapping("/top-five-orders-by-different-clients")
+    public ResponseEntity<Object> getTopFiveOrdersByDifferentClients() {
         try {
-            List<Order> topOrders = orderService.findTopOrdersByDifferentClients(limit);
-            return ResponseEntity.ok().body(topOrders);
+            List<OrderDTO> orders = orderService.getTopFiveOrdersByDifferentClients();
+            return ResponseEntity.ok().body(ResponseBuilder.buildResponse(Shop24APIMessages.RETRIEVED_TOP_ORDERS, true, orders));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving top orders.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseBuilder.buildResponse(e.getMessage(), false, null));
         }
     }
     
+   
 
 }

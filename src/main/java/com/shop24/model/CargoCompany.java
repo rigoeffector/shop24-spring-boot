@@ -30,6 +30,8 @@ public class CargoCompany {
     @Column(name = "longitude")
     private double longitude;
     
+//    remove this 
+    
     @Column(name = "distance") // Add distance attribute
     private Double distance; 
     

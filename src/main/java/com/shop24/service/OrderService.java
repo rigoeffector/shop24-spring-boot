@@ -104,9 +104,10 @@ public class OrderService {
     
 }
     
-    public List<Order> findTopOrdersByDifferentClients(int limit) {
-        Pageable pageable = PageRequest.of(0, limit);
-        return orderRepository.findTopOrdersByDifferentClients(pageable);
+    public List<OrderDTO> getTopFiveOrdersByDifferentClients() {
+        List<Order> orders = orderRepository.findTopOrdersByDifferentClients(PageRequest.of(0, 5));
+        return orders.stream().map(DTOMapper::toOrderDTO).collect(Collectors.toList());
     }
+    
 
 }
