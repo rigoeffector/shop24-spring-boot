@@ -15,6 +15,7 @@ import com.shop24.model.Order;
 import com.shop24.repository.ClientRepository;
 import com.shop24.repository.DrinkRepository;
 import com.shop24.repository.OrderRepository;
+import com.shop24.repository.ReceiptRepository;
 import com.shop24.util.DTOMapper;
 import com.shop24.util.Shop24APIMessages;
 
@@ -34,8 +35,10 @@ public class OrderService {
 
     @Autowired
     private DrinkRepository drinkRepository;
-
-
+    
+    @Autowired
+    private ReceiptRepository receiptRepository;
+    
     @Transactional
     public Order createOrder(Long clientId, Order order) {
         // Retrieve the client
@@ -125,7 +128,9 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+    @Transactional
     public void markOrderAsPaid(Long orderId) {
+        // Retrieve the order
         Order order = getOrderById(orderId);
         if (order == null) {
             throw new IllegalArgumentException("Order not found.");
@@ -133,11 +138,29 @@ public class OrderService {
         if (order.isPaid()) {
             throw new IllegalArgumentException("Order is already paid.");
         }
+
+        // Update drink quantities
+        for (Drink drink : order.getDrinks()) {
+            Drink existingDrink = drinkRepository.findById(drink.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Drink with ID " + drink.getId() + " not found"));
+            
+            int newQuantity = existingDrink.getQuantity() - drink.getQuantity();
+            if (newQuantity < 0) {
+                throw new IllegalArgumentException("Not enough quantity for drink with ID " + drink.getId());
+            }
+            
+            existingDrink.setQuantity(newQuantity);
+            drinkRepository.save(existingDrink);
+        }
+
+        // Mark the order as paid
         order.setPaid(true);
         orderRepository.save(order);
+
         // Automatically complete the order after marking it as paid
-        completeOrder(orderId);
+//        completeOrder(orderId);
     }
+
 
     public List<OrderDTO> getTopPaidOrders(int limit) {
         Pageable pageable = PageRequest.of(0, limit);
@@ -152,8 +175,8 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
-    public List<OrderDTO> getTopFiveOrdersByDifferentClients() {
-        List<Order> orders = orderRepository.findTopOrdersByDifferentClients(PageRequest.of(0, 5));
+    public List<OrderDTO> getTopFiveOrdersByDifferentClients(int limit) {
+        List<Order> orders = orderRepository.findTopOrdersByDifferentClients(PageRequest.of(0, limit));
         return orders.stream().map(DTOMapper::toOrderDTO).collect(Collectors.toList());
     }
 }

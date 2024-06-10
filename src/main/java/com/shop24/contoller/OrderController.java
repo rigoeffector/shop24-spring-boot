@@ -114,10 +114,10 @@ public class OrderController {
     }
     
     
-    @GetMapping("/top-five-orders-by-different-clients")
-    public ResponseEntity<Object> getTopFiveOrdersByDifferentClients() {
+    @GetMapping(  "/top-five-orders-by-different-clients/{limit}")
+    public ResponseEntity<Object> getTopFiveOrdersByDifferentClients(@PathVariable int limit) {
         try {
-            List<OrderDTO> orders = orderService.getTopFiveOrdersByDifferentClients();
+            List<OrderDTO> orders = orderService.getTopFiveOrdersByDifferentClients(limit);
             return ResponseEntity.ok().body(ResponseBuilder.buildResponse(Shop24APIMessages.RETRIEVED_TOP_ORDERS, true, orders));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseBuilder.buildResponse(e.getMessage(), false, null));

@@ -10,6 +10,7 @@ import com.shop24.model.CargoCompany;
 import com.shop24.model.Client;
 import com.shop24.model.Drink;
 import com.shop24.model.Order;
+import com.shop24.model.Receipt;
 
 public class DTOMapper {
 
@@ -74,5 +75,19 @@ public class DTOMapper {
         }
         return orderDTO;
     }
+    
+//    public static ReceiptDTO toReceiptDTO(Receipt receipt) {
+//        ReceiptDTO receiptDTO = new ReceiptDTO();
+//        receiptDTO.setId(receipt.getId());
+//        receiptDTO.setOrderId(receipt.getOrder().getId());
+//        receiptDTO.setClientId(receipt.getClient().getId());
+//        receiptDTO.setClientName(receipt.getClient().getName());
+//        receiptDTO.setCargoCompanyId(receipt.getCargoCompany().getId());
+//        receiptDTO.setCargoCompanyName(receipt.getCargoCompany().getName());
+//        receiptDTO.setDrinks(receipt.getDrinks().stream().map(DTOMapper::toDrinkDTO).collect(Collectors.toList()));
+//        receiptDTO.setIssuedAt(receipt.getIssuedAt());
+//        receiptDTO.setTotalAmount(receipt.getTotalAmount());
+//        return receiptDTO;
+//    }
 
 }

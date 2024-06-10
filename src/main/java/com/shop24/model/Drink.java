@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -29,6 +31,9 @@ public class Drink {
   
     private int quantity;
     
+//    @ManyToOne
+//    @JoinColumn(name = "receipt_id")
+//    private Receipt receipt;
     
 	public Drink() {
 		
@@ -73,5 +78,13 @@ public class Drink {
 		this.quantity = quantity;
 	}
 
+//	public Receipt getReceipt() {
+//	        return receipt;
+//	 }
+//
+//	public void setReceipt(Receipt receipt) {
+//	        this.receipt = receipt;
+//	 }
+	
   
 }
