@@ -1,5 +1,6 @@
 package com.shop24.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -8,13 +9,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.shop24.dto.OrderDTO;
-import com.shop24.model.CargoCompany;
 import com.shop24.model.Client;
+import com.shop24.model.Drink;
 import com.shop24.model.Order;
 import com.shop24.repository.ClientRepository;
+import com.shop24.repository.DrinkRepository;
 import com.shop24.repository.OrderRepository;
 import com.shop24.util.DTOMapper;
 import com.shop24.util.Shop24APIMessages;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.data.domain.Pageable;
 
 
@@ -23,32 +28,63 @@ import org.springframework.data.domain.Pageable;
 public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
-    @Autowired
-    private ClientRepository clientRepository;
     
     @Autowired
-    private CargoCompanyService cargoCompanyService;
+    private ClientRepository clientRepository;
 
+    @Autowired
+    private DrinkRepository drinkRepository;
+
+
+    @Transactional
     public Order createOrder(Long clientId, Order order) {
         // Retrieve the client
         Client client = clientRepository.findById(clientId)
-                                        .orElseThrow(() -> new IllegalArgumentException(Shop24APIMessages.CLIENT_NOT_FOUND));
-
+                .orElseThrow(() -> new IllegalArgumentException(Shop24APIMessages.CLIENT_NOT_FOUND));
+        
+        // Validate and populate drinks
+        List<Drink> incomingOrderDrinks = new ArrayList<>();
+        for (Drink drink : order.getDrinks()) {
+            Drink fullDrinkDetails = drinkRepository.findById(drink.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Drink with ID " + drink.getId() + " not found"));
+            
+            // Check if the requested quantity is available
+            if (fullDrinkDetails.getQuantity() < drink.getQuantity()) {
+                throw new IllegalArgumentException("Not enough quantity for drink with ID " + drink.getId());
+            }
+            
+            // Update the quantity in the order
+            fullDrinkDetails.setQuantity(drink.getQuantity());
+            incomingOrderDrinks.add(fullDrinkDetails);
+        }
+        order.setDrinks(incomingOrderDrinks);
+        
+        // Check if an order with the same drinks already exists for the client
+        List<Order> existingOrders = orderRepository.findByClient(client);
+        for (Order existingOrder : existingOrders) {
+            List<Drink> existingDrinks = existingOrder.getDrinks();
+            List<Drink> newOrderDrinks = order.getDrinks();
+            boolean containsSameDrinks = existingDrinks.stream()
+                                    .map(Drink::getId)
+                                    .collect(Collectors.toSet())
+                                    .equals(newOrderDrinks.stream()
+                                            .map(Drink::getId)
+                                            .collect(Collectors.toSet()));
+            if (containsSameDrinks) {
+                throw new IllegalArgumentException("Order with the same drinks already exists for " + client.getName());
+            }
+        }
+        
         // Set the client in the order
         order.setClient(client);
-
-        // Assuming cargo company is provided in the request body or fetched from somewhere
-        CargoCompany cargoCompany = order.getCargoCompany();
-        if (cargoCompany != null) {
-            // Fetch the cargo company by its ID if it's not null
-            cargoCompany = cargoCompanyService.getCargoCompanyById(cargoCompany.getId());
-            // Set the fetched cargo company in the order
-            order.setCargoCompany(cargoCompany);
-        }
-
+        
+    
+        
         // Save the order
         return orderRepository.save(order);
     }
+
+
 
 
     public List<Order> getAllOrders() {
@@ -64,6 +100,7 @@ public class OrderService {
         return orderRepository.findByClient(client);
     }
 
+    @Transactional
     public Order completeOrder(Long id) {
         Order order = orderRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Order not found."));
         if (order.isCompleted()) {
@@ -73,8 +110,21 @@ public class OrderService {
             throw new IllegalArgumentException("Order must be paid before it can be completed.");
         }
         order.setCompleted(true);
+
+        // Reduce the drink quantities
+        for (Drink drink : order.getDrinks()) {
+            Drink availableDrink = drinkRepository.findById(drink.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Drink not found"));
+            if (availableDrink.getQuantity() < drink.getQuantity()) {
+                throw new IllegalArgumentException("Not enough quantity for drink " + availableDrink.getName());
+            }
+            availableDrink.setQuantity(availableDrink.getQuantity() - drink.getQuantity());
+            drinkRepository.save(availableDrink);
+        }
+
         return orderRepository.save(order);
     }
+
     public void markOrderAsPaid(Long orderId) {
         Order order = getOrderById(orderId);
         if (order == null) {
@@ -88,8 +138,7 @@ public class OrderService {
         // Automatically complete the order after marking it as paid
         completeOrder(orderId);
     }
-    
-    
+
     public List<OrderDTO> getTopPaidOrders(int limit) {
         Pageable pageable = PageRequest.of(0, limit);
         List<Order> topPaidOrders = orderRepository.findTopPaidOrders(pageable);
@@ -101,13 +150,10 @@ public class OrderService {
                     return orderDTO;
                 })
                 .collect(Collectors.toList());
-    
-}
-    
+    }
+
     public List<OrderDTO> getTopFiveOrdersByDifferentClients() {
         List<Order> orders = orderRepository.findTopOrdersByDifferentClients(PageRequest.of(0, 5));
         return orders.stream().map(DTOMapper::toOrderDTO).collect(Collectors.toList());
     }
-    
-
 }

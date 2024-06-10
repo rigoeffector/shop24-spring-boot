@@ -1,5 +1,6 @@
 package com.shop24.dto;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class OrderDTO {
@@ -45,6 +46,27 @@ public class OrderDTO {
     public boolean isCompleted() {
         return isCompleted;
     }
+    
+    private LocalDateTime createdAt;
+
+
+    public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	private LocalDateTime updatedAt;
 
     public void setCompleted(boolean isCompleted) {
         this.isCompleted = isCompleted;

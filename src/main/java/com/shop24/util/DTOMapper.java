@@ -19,7 +19,20 @@ public class DTOMapper {
         orderDTO.setClient(toClientDTO(order.getClient()));
         orderDTO.setDrinks(order.getDrinks().stream().map(DTOMapper::toDrinkDTO).collect(Collectors.toList()));
         orderDTO.setPaid(order.isPaid());
+        orderDTO.setCreatedAt(order.getCreatedAt());
+        orderDTO.setUpdatedAt(order.getUpdatedAt());
         orderDTO.setCompleted(order.isCompleted());
+        
+        // Map cargo company information
+        if (order.getCargoCompany() != null) {
+            CargoCompanyDTO cargoCompanyDTO = new CargoCompanyDTO();
+            cargoCompanyDTO.setCargoCompanyId(order.getCargoCompany().getId());
+            cargoCompanyDTO.setName(order.getCargoCompany().getName());
+            cargoCompanyDTO.setAddress(order.getCargoCompany().getAddress());
+            cargoCompanyDTO.setLatitude(order.getCargoCompany().getLatitude());
+            cargoCompanyDTO.setLongitude(order.getCargoCompany().getLongitude());
+            orderDTO.setCargoCompany(cargoCompanyDTO);
+        }
         return orderDTO;
     }
 
@@ -53,4 +66,13 @@ public class DTOMapper {
         cargoCompanyDTO.setLongitude(cargoCompany.getLongitude());
         return cargoCompanyDTO;
     }
+    
+    public static OrderDTO toOrderDTOWithCargoCompany(Order order) {
+        OrderDTO orderDTO = toOrderDTO(order);
+        if (order.getCargoCompany() != null) {
+            orderDTO.setCargoCompany(toCargoCompanyDTO(order.getCargoCompany()));
+        }
+        return orderDTO;
+    }
+
 }

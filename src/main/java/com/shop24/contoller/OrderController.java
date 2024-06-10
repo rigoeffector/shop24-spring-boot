@@ -41,19 +41,26 @@ public class OrderController {
     @PostMapping("/client/{clientId}")
     public ResponseEntity<Object> createOrder(@PathVariable Long clientId, @RequestBody Order order) {
         try {
-            // Assuming cargo company is provided in the request body or fetched from somewhere
+            // Fetch the cargo company from the database
             CargoCompany cargoCompany = cargoCompanyService.getCargoCompanyById(order.getCargoCompany().getId());
+            // Set the fetched cargo company in the order
             order.setCargoCompany(cargoCompany);
+            System.out.println();
 
+            // Create the order
             Order createdOrder = orderService.createOrder(clientId, order);
+            // Convert the created order to DTO for response
             OrderDTO orderDTO = DTOMapper.toOrderDTO(createdOrder);
+            // Return success response
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ResponseBuilder.buildResponse(Shop24APIMessages.ADD_ORDER_SUCCESS, true, orderDTO));
         } catch (IllegalArgumentException e) {
+            // Return error response
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ResponseBuilder.buildResponse(e.getMessage(), false, null));
         }
     }
+
 
     @GetMapping("/client/{clientId}")
     public ResponseEntity<Object> getOrdersByClientId(@PathVariable Long clientId) {

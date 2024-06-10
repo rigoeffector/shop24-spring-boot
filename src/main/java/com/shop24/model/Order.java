@@ -1,9 +1,15 @@
 package com.shop24.model;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,7 +39,11 @@ public class Order {
                inverseJoinColumns = @JoinColumn(name = "drink_id"))
     private List<Drink> drinks;
 
-    @ManyToOne
+    
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems = new ArrayList<>();;
+    
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "cargo_company_id")
     private CargoCompany cargoCompany; 
 
@@ -43,6 +53,13 @@ public class Order {
     @Column(name = "is_completed", nullable = false)
     private boolean isCompleted;
 
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+    
     public Order() {
     }
 
@@ -58,7 +75,23 @@ public class Order {
         return client;
     }
 
-    public void setClient(Client client) {
+    public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	public void setClient(Client client) {
         this.client = client;
     }
 
@@ -70,6 +103,14 @@ public class Order {
         this.drinks = drinks;
     }
 
+
+    public List<OrderItem> getOrderItems() {
+        return orderItems;
+    }
+
+    public void setOrderItems(List<OrderItem> orderItems) {
+        this.orderItems = orderItems;
+    }
     public CargoCompany getCargoCompany() {
         return cargoCompany;
     }
@@ -91,9 +132,13 @@ public class Order {
     }
 
     public void setCompleted(boolean isCompleted) {
-        this.isCompleted = isCompleted;
+    	  this.isCompleted = isCompleted;
+          if (isCompleted) {
+              for (Drink drink : drinks) {
+                  drink.setQuantity(drink.getQuantity() - 1);  // Adjust based on order quantity
+              }
+          }
     }
     
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItem> orderItems;
+  
 }

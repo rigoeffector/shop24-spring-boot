@@ -1,7 +1,6 @@
 package com.shop24.service;
 
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.shop24.model.CargoCompany;
-import com.shop24.model.Drink;
 import com.shop24.repository.CargoCompanyRepository;
 import com.shop24.util.DistanceCalculator;
 
